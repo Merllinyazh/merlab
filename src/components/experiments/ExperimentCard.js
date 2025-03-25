@@ -16,7 +16,7 @@ const ExperimentCard = ({ title, duration, progress, description }) => {
       marginBottom: '12px',
     },
     tag: {
-      backgroundColor: 'var(--gray-light)',
+      backgroundColor: 'black',
       padding: '4px 8px',
       borderRadius: '4px',
       fontSize: '14px',
@@ -26,7 +26,7 @@ const ExperimentCard = ({ title, duration, progress, description }) => {
       top: '12px',
       right: '12px',
       backgroundColor: 'var(--primary-color)',
-      color: 'var(--white)',
+      color: 'var(--black)',
       padding: '4px 8px',
       borderRadius: '4px',
     },

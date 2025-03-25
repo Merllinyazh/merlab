@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titration Experiment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .burette, .test-tube {
+            border: 2px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .burette {
+            width: 30px;
+            height: 250px;
+            background: white;
+            border-radius: 0 0 5px 5px;
+            display: inline-block;
+        }
+
+        .burette-liquid {
+            width: 100%;
+            height: 80%;
+            background: red;
+            position: absolute;
+            bottom: 0;
+            transition: height 1s;
+        }
+
+        .test-tube {
+            width: 100px;
+            height: 180px;
+            border-radius: 0 0 30px 30px;
+            background: white;
+            display: inline-block;
+        }
+
+        .test-liquid {
+            width: 100%;
+            height: 30%;
+            position: absolute;
+            bottom: 0;
+            background: blue;
+            transition: height 1s, background 1s;
+        }
+
+        #ph-meter {
+            font-size: 22px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .btn-add { background: #ff5722; color: white; }
+        .btn-submit { background: #4CAF50; color: white; }
+        .btn-back { background: #2196F3; color: white; }
+
+        .btn:hover { opacity: 0.8; }
+    </style>
+</head>
+<body>
+    <h1>Titration Experiment</h1>
+    <div class="container">
+        <div class="burette">
+            <div class="burette-liquid" id="burette-liquid"></div>
+        </div>
+        <button class="btn btn-add" onclick="addDrop()">Add Acid/Base Drop</button>
+        <div class="test-tube">
+            <div class="test-liquid" id="test-liquid"></div>
+        </div>
+        <div id="ph-meter">pH: <span id="ph-value">7.0</span></div>
+        <button class="btn btn-submit" onclick="submitExperiment()">Submit</button>
+        <button class="btn btn-back" onclick="goBack()">Back to Practice Space</button>
+    </div>
+
+    <script>
+        let pH = 7.0;
+        let volumeAdded = 0;
+
+        function speak(text) {
+            let speech = new SpeechSynthesisUtterance(text);
+            speech.lang = "en-US";
+            speech.rate = 1;
+            window.speechSynthesis.speak(speech);
+        }
+
+        function addDrop() {
+            volumeAdded += 0.1;
+            pH -= 0.2;
+            if (pH < 0) pH = 0;
+
+            document.getElementById("ph-value").innerText = pH.toFixed(1);
+            let testLiquid = document.getElementById("test-liquid");
+            testLiquid.style.height = `${30 + volumeAdded * 5}%`;
+
+            // Change color based on pH
+            let color = "blue";
+            if (pH > 7) color = "blue";
+            else if (pH > 4) color = "purple";
+            else if (pH > 2) color = "pink";
+            else color = "red";
+            testLiquid.style.background = color;
+
+            speak(`Drop added. Current pH is ${pH.toFixed(1)}.`);
+        }
+
+        function submitExperiment() {
+            alert(`Experiment submitted! Final pH: ${pH.toFixed(1)}`);
+            speak(`Experiment submitted. The final pH is ${pH.toFixed(1)}.`);
+        }
+
+        function goBack() {
+            speak("Returning to practice space.");
+            setTimeout(() => {
+                window.location.href = "practice-space.html";
+            }, 1000);
+        }
+
+        // Voice Recognition
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.lang = 'en-US';
+        recognition.start();
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+            if (transcript.includes("add drop")) {
+                addDrop();
+            } else if (transcript.includes("submit")) {
+                submitExperiment();
+            } else if (transcript.includes("go back")) {
+                goBack();
+            }
+        };
+
+        speak("Welcome to the titration experiment. Say 'add drop' to start adding acid or base.");
+    </script>
+</body>
+</html>

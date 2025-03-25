@@ -3,17 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 
+
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ email: '', password: '' });
-
+ 
   const styles = {
     container: {
       height: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundImage: "url('/assets/Login.png')",
+      backgroundImage: "url('public/assets/Login.png')",
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',

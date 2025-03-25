@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background: #f0f0f0;
+            background: #e3f2fd;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -19,12 +19,13 @@
 
         #level {
             text-align: center;
+            color: #0d47a1;
         }
 
         .test-tube {
             width: 80px;
             height: 160px;
-            border: 2px solid #333;
+            border: 2px solid #0d47a1;
             border-radius: 0 0 20px 20px;
             position: relative;
             background-color: rgba(255, 255, 255, 0.7);
@@ -32,6 +33,12 @@
             margin: 20px;
             display: inline-block;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .test-tube:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(13, 71, 161, 0.4);
         }
 
         .liquid {
@@ -46,7 +53,7 @@
             margin-top: 10px;
             font-size: 16px;
             font-weight: bold;
-            color: #333;
+            color: #0d47a1;
             display: block;
             text-align: center;
         }
@@ -67,21 +74,24 @@
         #moves {
             font-size: 18px;
             margin: 10px;
+            color: #0d47a1;
         }
 
         button {
             padding: 10px 20px;
             font-size: 16px;
-            background-color: #28a745;
+            background-color: #1565c0;
             color: white;
             border: none;
             cursor: pointer;
             margin-top: 20px;
             border-radius: 5px;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
 
         button:hover {
-            background-color: #218838;
+            background-color: #0d47a1;
+            box-shadow: 0 8px 15px rgba(13, 71, 161, 0.3);
         }
 
         .beaker-container {
@@ -100,7 +110,7 @@
         }
 
         #voice-button {
-            background: #2196F3;
+            background: #1976d2;
             color: white;
             border: none;
             width: 50px;
@@ -116,7 +126,7 @@
         }
 
         #voice-button:hover {
-            background: #0b7dda;
+            background: #0d47a1;
             transform: scale(1.05);
         }
 
@@ -143,6 +153,7 @@
     </style>
 </head>
 <body>
+    <a id="back-button" href="practice-space.html">&#8592; Back</a>
     <div id="level"></div>
     <button id="submitBtn">Submit</button>
 

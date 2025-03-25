@@ -3,541 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chemistry Lab: Acid-Base Experiments</title>
+    <title>Interactive Chemistry Lab</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
             font-family: Arial, sans-serif;
-            background: #f0f0f0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #menu {
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-        }
-
-        .btn {
-            background: #4CAF50;
+            background-color: #1e3a8a; /* Deep Blue Theme */
             color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            background: #45a049;
-            transform: scale(1.05);
-        }
-
-        .test-tube {
-            width: 80px;
-            height: 160px;
-            border: 2px solid #333;
-            border-radius: 0 0 20px 20px;
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-            transition: all 1s ease;
-            overflow: hidden;
-        }
-
-        .liquid {
-            width: 100%;
-            height: 60px;
-            position: absolute;
-            bottom: 0;
-            transition: all 1s ease;
-        }
-
-        .label {
-            position: absolute;
-            top: -25px;
-            width: 100%;
             text-align: center;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .burette {
-            width: 20px;
-            height: 200px;
-            background: white;
-            position: absolute;
-            border: 2px solid #333;
-            top: 200px; /* ✅ Move burette 50px down */
-            border-radius: 0 0 5px 5px;
-            overflow: hidden;
-        }
-
-        .burette-liquid {
-            width: 100%;
-            height: 100%;
-            background: #ffcdd2;
-            position: absolute;
-            bottom: 0;
-            transition: height 1s linear;
-        }
-
-        .droplet {
-            width: 8px;
-            height: 8px;
-            background: #ffcdd2;
-            position: absolute;
-            border-radius: 50%;
-            animation: drop 1.5s linear;
-        }
-
-        @keyframes drop {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(100px); opacity: 0; }
-        }
-
-        #ph-meter {
-            display: none; /* ✅ Hidden initially */
-            position: absolute;
-            top: 620px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            border: 1px solid #333;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        #titration-controls {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
-        }
-
-        /* Voice control styles */
-        #voice-controls {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #voice-button {
-            background: #2196F3;
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: all 0.3s;
+            height: 100vh;
+            margin: 0;
         }
 
-        #voice-button:hover {
-            background: #0b7dda;
+        .container {
+            background: #2563eb; /* Lighter Blue */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 50%;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .container:hover {
             transform: scale(1.05);
         }
 
-        #voice-button.listening {
-            background: #F44336;
-            animation: pulse 1.5s infinite;
+        h1 {
+            margin-bottom: 20px;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        button {
+            padding: 12px 20px;
+            margin: 15px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+            font-weight: bold;
         }
 
-        #voice-status {
-            margin-top: 5px;
-            font-size: 12px;
-            color: #555;
-            text-align: center;
+        .titration {
+            background-color: #4f46e5; /* Darker Blue */
+            color: white;
         }
+
+        .neutralization {
+            background-color: #3b82f6; /* Light Blue */
+            color: white;
+        }
+
+        button:hover {
+            background-color: white;
+            color: #1e3a8a;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(255, 255, 255, 0.2);
+        }
+
+        #experimentResult {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .visible {
+            opacity: 1 !important;
+        }
+
     </style>
 </head>
 <body>
-    <div id="menu">
-        <h1>Chemistry Lab</h1>
-        <h2>Acid-Base Experiments</h2>
-        <button onclick="startExperiment('neutralization')" class="btn">Neutralization</button>
-        <button onclick="startExperiment('titration')" class="btn">Titration</button>
-    </div>
-    <div id="level" style="display: none;"></div>
-    <div id="ph-meter">pH: <span id="ph-value">7.0</span></div>
-    <div id="titration-controls">
-        <button onclick="addDrop()" class="btn">Add Drop</button>
-        <span id="volume-added">Volume added: 0.0 mL</span>
-        <button onclick="submitTitration()" class="btn">Submit</button> <!-- ✅ Submit button added -->
-    </div>
 
-    <!-- Voice control UI -->
-    <div id="voice-controls">
-        <button id="voice-button" onclick="toggleVoiceRecognition()">
-            <i>🎤</i>
-        </button>
-        <div id="voice-status">Click to activate voice</div>
+    <div class="container">
+        <h1>🔬 Interactive Chemistry Lab</h1>
+        <p>Click a button to perform an experiment:</p>
+        <button class="titration" onclick="performExperiment('titration')">Titration Experiment</button>
+        <button class="neutralization" onclick="performExperiment('neutralization')">Neutralization Experiment</button>
+
+        <p id="experimentResult"></p>
     </div>
 
     <script>
-        let mode = '';
-        let volumeAdded = 0;
-        let dropCount = 0;
-        let recognition;
-        let isListening = false;
-
-            // Enhanced speech recognition initialization
-    function initSpeechRecognition() {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-
-            recognition.onresult = function(event) {
-                let transcript = event.results[0][0].transcript.toLowerCase().trim();
-                console.log("Final transcript:", transcript);
-                document.getElementById('voice-status').textContent = 'Command: ' + transcript;
-
-                processVoiceCommand(transcript);
-
-                setTimeout(() => {
-                    document.getElementById('voice-status').textContent = 'Click to activate voice';
-                }, 3000);
-            };
-
-            recognition.onend = function() {
-                console.log("Speech recognition ended.");
-                isListening = false;
-                document.getElementById('voice-button').classList.remove('listening');
-
-                    // ✅ Auto-restart recognition (prevents "no-speech" errors)
-                setTimeout(() => {
-                    if (isListening) recognition.start();
-                }, 1000);
-            };
-
-            recognition.onerror = function(event) {
-                console.error('Speech recognition error:', event.error);
-                let errorMessage = '';
-
-                switch (event.error) {
-                    case 'no-speech':
-                        errorMessage = 'No speech detected. Try again.';
-                        break;
-                    case 'audio-capture':
-                        errorMessage = 'Microphone not available.';
-                        break;
-                    case 'not-allowed':
-                        errorMessage = 'Microphone access denied.';
-                        break;
-                    default:
-                        errorMessage = 'Recognition error: ' + event.error;
-                }
-
-                document.getElementById('voice-status').textContent = errorMessage;
-
-                    // ✅ Auto-restart in case of errors
-                setTimeout(() => {
-                    document.getElementById('voice-status').textContent = 'Click to activate voice';
-                    if (isListening) recognition.start();
-                }, 3000);
-            };
-        } else {
-            document.getElementById('voice-status').textContent = 'Speech recognition not supported';
-        }
-    }
-
-    // Toggle voice recognition on/off
-    function toggleVoiceRecognition() {
-        if (!recognition) {
-            initSpeechRecognition();
-        }
-        
-        if (isListening) {
-            recognition.stop();
-            isListening = false;
-            document.getElementById('voice-button').classList.remove('listening');
-            document.getElementById('voice-status').textContent = 'Voice recognition stopped';
-        } else {
-            try {
-                recognition.start();
-                isListening = true;
-                document.getElementById('voice-button').classList.add('listening');
-                document.getElementById('voice-status').textContent = 'Listening...';
-            } catch (error) {
-                console.error('Speech recognition error', error);
-                document.getElementById('voice-status').textContent = 'Error starting recognition';
+        function performExperiment(type) {
+            let result = document.getElementById("experimentResult");
+    
+            if (type === "titration") {
+                window.location.href = "titration.html"; // Redirect to titration page
+            } else if (type === "neutralization") {
+                window.location.href = "neutralization.html"; // Redirect to neutralization page
             }
         }
-    }
-
-    // Enhanced voice command processing
-    function processVoiceCommand(command) {
-        console.log('Processing voice command:', command);
-        
-        // Add visual feedback
-        addCommandFeedback(command);
-        
-        // Menu commands - More flexible matching patterns
-        if (mode === '') {
-            console.log('In menu mode');
-            if (/\b(start|begin|open|launch|go to)\b.*\b(neutralization|neutral)/i.test(command)) {
-                console.log('Starting neutralization experiment');
-                startExperiment('neutralization');
-                return;
-            } 
-            
-            if (/\b(start|begin|open|launch|go to)\b.*\b(titration|titrate)/i.test(command)) {
-                console.log('Starting titration experiment');
-                startExperiment('titration');
-                return;
-            }
-        }
-        
-        // Titration experiment commands
-        if (mode === 'titration') {
-            console.log('In titration mode');
-            if (/\b(add|put|place|drop|insert|one more)\b.*\b(drop|drip|droplet)/i.test(command) || 
-                command.includes('drop') || command.includes('add')) {
-                console.log('Adding drop');
-                addDrop();
-                return;
-            }
-            
-            if (/\b(submit|finish|complete|done|check|verify|confirm)/i.test(command)) {
-                console.log('Submitting titration');
-                submitTitration();
-                return;
-            }
-        }
-        
-        // General navigation commands
-        if (/\b(back|return|menu|home|main|restart|reload)/i.test(command)) {
-            console.log('Returning to menu');
-            window.location.reload();
-            return;
-        }
-        
-        // Help command
-        if (/\b(help|what can i say|commands|instruction)/i.test(command)) {
-            showHelp();
-            return;
-        }
-        
-        // If no command matched, provide feedback
-        console.log('Command not recognized');
-        document.getElementById('voice-status').textContent = 'Command not recognized. Try "help" for available commands.';
-    }
-
-    // Function to add visual feedback for recognized commands
-    function addCommandFeedback(command) {
-        // Create a feedback element
-        const feedback = document.createElement('div');
-        feedback.style.position = 'fixed';
-        feedback.style.top = '80px';
-        feedback.style.right = '20px';
-        feedback.style.padding = '10px 15px';
-        feedback.style.background = 'rgba(0, 0, 0, 0.7)';
-        feedback.style.color = 'white';
-        feedback.style.borderRadius = '5px';
-        feedback.style.zIndex = '9999';
-        feedback.style.transition = 'opacity 0.5s';
-        feedback.textContent = `Command: "${command}"`;
-        
-        document.body.appendChild(feedback);
-        
-        // Remove after 2 seconds
-        setTimeout(() => {
-            feedback.style.opacity = '0';
-            setTimeout(() => {
-                document.body.removeChild(feedback);
-            }, 500);
-        }, 2000);
-    }
-
-    // Function to show available voice commands
-    function showHelp() {
-        // Create help dialog
-        const helpDialog = document.createElement('div');
-        helpDialog.style.position = 'fixed';
-        helpDialog.style.top = '0';
-        helpDialog.style.left = '0';
-        helpDialog.style.width = '100%';
-        helpDialog.style.height = '100%';
-        helpDialog.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        helpDialog.style.zIndex = '10000';
-        helpDialog.style.display = 'flex';
-        helpDialog.style.justifyContent = 'center';
-        helpDialog.style.alignItems = 'center';
-        
-        const helpContent = document.createElement('div');
-        helpContent.style.width = '80%';
-        helpContent.style.maxWidth = '500px';
-        helpContent.style.backgroundColor = 'white';
-        helpContent.style.padding = '20px';
-        helpContent.style.borderRadius = '10px';
-        helpContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-        
-        helpContent.innerHTML = `
-            <h2 style="text-align: center; margin-top: 0;">Voice Commands</h2>
-            <h3>Main Menu:</h3>
-            <ul>
-                <li>"Start neutralization" / "Begin neutralization experiment"</li>
-                <li>"Start titration" / "Begin titration experiment"</li>
-            </ul>
-            <h3>Titration Experiment:</h3>
-            <ul>
-                <li>"Add drop" / "Drop" / "One more drop"</li>
-                <li>"Submit" / "Finish" / "Complete"</li>
-            </ul>
-            <h3>General Commands:</h3>
-            <ul>
-                <li>"Go back" / "Return to menu" / "Menu"</li>
-                <li>"Help" / "What can I say"</li>
-            </ul>
-            <div style="text-align: center; margin-top: 20px;">
-                <button id="close-help" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
-            </div>
-        `;
-        
-        helpDialog.appendChild(helpContent);
-        document.body.appendChild(helpDialog);
-        
-        // Add close button functionality
-        document.getElementById('close-help').addEventListener('click', () => {
-            document.body.removeChild(helpDialog);
-        });
-    }
-
-    // Make sure main functions are defined in global scope
-    window.toggleVoiceRecognition = toggleVoiceRecognition;
-
-        function startExperiment(experimentMode) {
-            if (experimentMode === "neutralization") {
-                window.location.href = "/neutralization.html"; // ✅ Open neutralization in same tab
-                return;
-            }
-
-            mode = experimentMode;
-            document.getElementById("menu").style.display = "none";
-            document.getElementById("level").style.display = "block";
-
-            if (mode === "titration") {
-                setupTitration();
-                document.getElementById("ph-meter").style.display = "block"; // ✅ Show pH meter
-            } else {
-                document.getElementById("ph-meter").style.display = "none"; // ✅ Hide pH meter
-            }
-        }
-
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                let utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US';
-                utterance.rate = 1.0;
-                utterance.pitch = 1.0;
-                speechSynthesis.speak(utterance);
-            } else {
-                console.log("Text-to-Speech is not supported in this browser.");
-            }
-        }
-
-
-        function setupTitration() {
-            volumeAdded = 0;
-            dropCount = 0;
-            document.getElementById("level").innerHTML = `
-                <div id="lvl-heading" style="margin-top: 20px;">Titration Experiment</div>
-
-                <div class="burette" style="left: calc(50% - 10px); top: 200px;">
-                    <div class="burette-liquid" style="height: 100%"></div>
-                    <div class="volume-display">50.0 mL</div>
-                </div>
-
-                <div class="test-tube" style="top: 450px; left: calc(50% - 40px);">
-                    <div class="liquid" style="background-color: #b2ebf2; height: 60px;"></div>
-                    <div class="label">Unknown Base</div>
-                </div>
-            `;
-
-            document.getElementById("titration-controls").style.display = "block";
-            document.getElementById("ph-meter").style.display = "block";
-        }
-
-        function addDrop() {
-            volumeAdded += 0.5;
-            dropCount++;
-
-            let burette = document.querySelector('.burette-liquid');
-            let beaker = document.querySelector('.test-tube .liquid');
-
-            let droplet = document.createElement('div');
-            droplet.className = 'droplet';
-            droplet.style.position = "absolute";
-            droplet.style.width = "10px";
-            droplet.style.height = "10px";
-            droplet.style.backgroundColor = "#ff3333"; 
-            droplet.style.borderRadius = "50%";
-            droplet.style.zIndex = "1000";
-
-            let buretteRect = document.querySelector('.burette').getBoundingClientRect();
-            droplet.style.left = `${buretteRect.left + 8}px`; 
-            droplet.style.top = `${buretteRect.bottom - 10}px`; 
-
-            document.body.appendChild(droplet);
-
-            setTimeout(() => {
-                droplet.style.transition = "transform 1.5s linear";  
-                droplet.style.transform = `translateY(${beaker.getBoundingClientRect().top - buretteRect.bottom + 50}px)`;
-            }, 50);
-
-            setTimeout(() => {
-                droplet.remove();
-            }, 1600);
-
-            burette.style.height = `${100 - (volumeAdded / 50) * 100}%`;
-
-            if (dropCount >= 4) {
-                beaker.style.backgroundColor = "#ff9999"; 
-            }
-
-            document.getElementById("volume-added").textContent = `Volume added: ${volumeAdded.toFixed(1)} mL`;
-
-            // 🔊 Speak the action
-            speakText("Drop added. Volume: " + volumeAdded.toFixed(1) + " milliliters.");
-        }
-
-        function submitTitration() {
-            speakText("Titration submitted. Checking results...");
-
-            if (dropCount >= 5) {
-                speakText("Titration successful! The solution is neutralized.");
-                window.location.href = "/success.html"; // ✅ Redirect to success page
-            } else {
-                speakText("Titration incomplete. Try again.");
-                window.location.href = "/fail.html"; // ✅ Redirect to fail page
-            }
-        }
-
     </script>
+    
+
 </body>
 </html>

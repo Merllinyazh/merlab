@@ -21,6 +21,7 @@ const ExperimentDetail = () => {
       maxWidth: '100%',
       margin: '0 auto',
       paddingBottom: '80px',
+      backgroundColor: '#1e3a8a',
     },
     header: {
       marginBottom: '20px',
@@ -95,7 +96,7 @@ const ExperimentDetail = () => {
         {/* ✅ Procedure Section Below Video (Resizes when Chatbot Opens) */}
         <Card style={styles.section}>
           <h2 style={styles.sectionTitle}>Procedure</h2>
-          <p>Detailed procedure steps will go here...</p>
+          <p>Titration is a laboratory method used in quantitative chemical analysis to determine the concentration of an analyte (the substance being analyzed). It involves the gradual addition of a solution of known concentration (the titrant) to a measured volume of another solution of unknown concentration until the reaction reaches a specific endpoint, often indicated by a color change</p>
         </Card>
       </div>
 
