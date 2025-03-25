@@ -156,29 +156,24 @@ const StaticTable = () => (
 </mesh>
 );
 
-// 🎯 Burette Stand
-const BuretteStand = () => (
-  <group position={[0, -0.7, 0]} rotation={[-Math.PI / 6, 0, 0]}>
-    <mesh position={[0.1, -0.6, 0]}>
-      <boxGeometry args={[1, 0.15, 1]} />
-      <meshStandardMaterial color="black" />
-    </mesh>
-    <mesh position={[-0.3, 0.45, 0]}>
-      <cylinderGeometry args={[0.05, 0.05, 2, 32]} />
-      <meshStandardMaterial color="gray" />
-    </mesh>
-    <mesh position={[-0.15, 1.3, 0]} rotation={[0, 0, Math.PI]}>
-      <boxGeometry args={[0.65, 0.05, 0.1]} />
-      <meshStandardMaterial color="red" />
-    </mesh>
-  </group>
-);
+// 🎯 Burette Standrei";
+
+const BuretteStand = () => {
+  const { scene } = useGLTF("/burette_stand.glb"); // Load your GLB model
+
+  return (
+    <group position={[0, -1.4, 0]} rotation={[-Math.PI / 6, 0, 0]} scale={[7, 7, 7]}>
+      <primitive object={scene} />
+    </group>
+  );
+};
 
 
 // 🎯 Burette
 const Burette = ({ liquidColor, liquidHeight }) => {
   // Load the burette GLB model
-  const { scene } = useGLTF("/burette.glb"); // Make sure the path is correct
+  const { scene } = useGLTF("/burettel.glb");
+  console.log("Burette Model:", scene); // Make sure the path is correct
 
   // Liquid animation
   const { animatedHeight } = useSpring({
@@ -189,7 +184,7 @@ const Burette = ({ liquidColor, liquidHeight }) => {
   return (
     <group>
       {/* Render the burette model */}
-      <primitive object={scene} scale={1} position={[0, 0, 0]} />
+      <primitive object={scene} scale={[16, 16, 16]} position={[0, 0.5, 0]} />
 
       {/* Animated liquid inside the burette */}
       {liquidColor && (
