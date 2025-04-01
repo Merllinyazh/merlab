@@ -244,10 +244,12 @@ const GlassRack = () => {
   
 
   return (
-    <group position={[4.2, 1.2, 0]}>
+    <group position={[2.7, 1.9, 0]}
+    scale={[0.5, 0.5, 0.5]}
+    rotation={[Math.PI / -80, Math.PI / -10, Math.PI / 90]} >
       {/* Cabinet Frame */}
-      <mesh position={[1.4, 0, -0.5]}>
-        <boxGeometry args={[3, 4, 1]} />
+      <mesh position={[1.5, 0.4, -0.5]}>
+        <boxGeometry args={[4, 4, 1]} />
         <meshStandardMaterial color="white" />
       </mesh>
 
@@ -266,10 +268,7 @@ const GlassRack = () => {
       ))}
 
       
-      {/* Labels */}
-      <Html position={[0, 2.5, 0]}>
-        <div style={{ color: "white", fontSize: "1rem" }}>Glass Rack</div>
-      </Html>
+      
     </group>
   );
 };
