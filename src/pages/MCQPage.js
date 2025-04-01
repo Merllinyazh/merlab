@@ -240,7 +240,7 @@ const ConicalFlask = () => {
 const GlassRack = () => {
  
 
-  // Function to toggle doors
+  // Function to toggle doorsgit config --global user.name
   
 
   return (
