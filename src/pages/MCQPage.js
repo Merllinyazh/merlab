@@ -238,124 +238,28 @@ const ConicalFlask = () => {
 
 // 🔹 Rack Component (Holds all items)
 const GlassRack = () => {
- 
+  const { scene } = useGLTF("/glass_rack.glb"); // Ensure the path is correct
 
-  // Function to toggle doorsgit config --global user.name
-  
-
-  return (
-    <group position={[2.7, 1.9, 0]}
-    scale={[0.5, 0.5, 0.5]}
-    rotation={[Math.PI / -80, Math.PI / -10, Math.PI / 90]} >
-      {/* Cabinet Frame */}
-      <mesh position={[1.5, 0.4, -0.5]}>
-        <boxGeometry args={[4, 4, 1]} />
-        <meshStandardMaterial color="white" />
-      </mesh>
-
-      {/* Glass Shelves */}
-      {[1, 0, -1].map((y, i) => (
-        <mesh key={i} position={[1.4, y, 0]}>
-          <boxGeometry args={[2.8, 0.1, 0.9]} />
-          <meshPhysicalMaterial
-            color="lightblue"
-            transparent
-            opacity={0.5}
-            roughness={0.1}
-            metalness={0.3}
-          />
-        </mesh>
-      ))}
-
-      
-      
-    </group>
-  );
+  return <primitive object={scene} position={[0, 0, 0]} scale={[1, 1, 1]} />;
 };
-// 🔹 Pipette Component
-const Pipette = ({ position }) => {
+
+// 🔹 Main Scene Component with Debugging
+const Scene = () => {
   return (
-    <group position={position}>
-      <mesh>
-        <cylinderGeometry args={[0.05, 0.05, 1, 32]} />
-        <meshStandardMaterial color="gray" />
-      </mesh>
-      <Text position={[0, -0.6, 0]} fontSize={0.2} color="white">
-        Pipette
-      </Text>
-    </group>
+    <Canvas camera={{ position: [0, 2, 5], fov: 50 }}>
+      <ambientLight intensity={1} />
+      <directionalLight position={[5, 5, 5]} intensity={1} />
+      <GlassRack />
+      <OrbitControls /> {/* Allows you to move the camera */}
+    </Canvas>
   );
 };
 
-// 🔹 Test Tube Stack Component
-const TestTubeStack = ({ position }) => {
-  return (
-    <group position={position}>
-      {[...Array(5)].map((_, i) => (
-        <mesh key={i} position={[i * 0.2 - 0.4, 0, 0]}>
-          <cylinderGeometry args={[0.1, 0.1, 0.7, 32]} />
-          <meshStandardMaterial color="lightblue" transparent opacity={0.6} />
-        </mesh>
-      ))}
-      <Text position={[0, -0.5, 0]} fontSize={0.2} color="white">
-        Test Tubes
-      </Text>
-    </group>
-  );
-};
 
-// 🔹 Glass Rod Component
-const GlassRod = ({ position }) => {
-  return (
-    <group position={position}>
-      <mesh>
-        <cylinderGeometry args={[0.03, 0.03, 1, 32]} />
-        <meshStandardMaterial color="white" transparent opacity={0.5} />
-      </mesh>
-      <Text position={[0, -0.6, 0]} fontSize={0.2} color="white">
-        Glass Rod
-      </Text>
-    </group>
-  );
-};
+// 🔹 Main Scene Component
 
-// 🔹 Rack Beaker Component (Smaller for Rack)
-const RackBeaker = ({ position }) => {
-  const scaleFactor = 0.1; // Smaller Beaker for Rack
-  const points = [
-    new THREE.Vector2(5.0 * scaleFactor, 0),
-    new THREE.Vector2(4.8 * scaleFactor, 0.5 * scaleFactor),
-    new THREE.Vector2(4.0 * scaleFactor, 3.0 * scaleFactor),
-    new THREE.Vector2(3.5 * scaleFactor, 4.5 * scaleFactor),
-    new THREE.Vector2(3.0 * scaleFactor, 5.5 * scaleFactor),
-    new THREE.Vector2(2.2 * scaleFactor, 6.5 * scaleFactor),
-    new THREE.Vector2(1.5 * scaleFactor, 7.5 * scaleFactor),
-    new THREE.Vector2(1.5 * scaleFactor, 9.0 * scaleFactor),
-    new THREE.Vector2(1.8 * scaleFactor, 9.2 * scaleFactor),
-    new THREE.Vector2(2.0 * scaleFactor, 9.4 * scaleFactor),
-  ];
-  const flaskGeometry = new THREE.LatheGeometry(points, 120);
 
-  return (
-    <group position={position}>
-      <mesh geometry={flaskGeometry}>
-        <meshPhysicalMaterial
-          color="lightgray"
-          transparent
-          opacity={0.6}
-          roughness={0.04}
-          metalness={0.1}
-          transmission={1}
-          clearcoat={2}
-          reflectivity={0.9}
-        />
-      </mesh>
-      <Text position={[0, -0.5, 0]} fontSize={0.2} color="white">
-        Rack Beaker
-      </Text>
-    </group>
-  );
-};
+
 
 // 🎯 Main Experiment Layout
 const ExperimentLayout = () => {
