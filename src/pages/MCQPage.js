@@ -9,7 +9,7 @@ import * as THREE from "three";
 
 // 🎯 Sidebar Beaker Component (Reagents)
 const SidebarBeaker = ({ color, label, onClick }) => (
-  <div style={{ textAlign: "center", margin: "4px", cursor: "pointer" ,padding:"0.1px"}} onClick={() => onClick({ color, label })}>
+  <div style={{ textAlign: "center", margin: "0px", cursor: "pointer" ,padding:"0.1px"}} onClick={() => onClick({ color, label })}>
     <Canvas style={{ width: "90px", height: "200px" }}>
       <ambientLight intensity={0.5} />
       <mesh position={[0, -0.5, 0]}>
@@ -25,9 +25,9 @@ const SidebarBeaker = ({ color, label, onClick }) => (
       fontSize: "14px",
       fontWeight: "bold",
       marginTop: "0.1px",
-      padding: "0.1px",
+      padding: "-0.1px",
       backgroundColor: "#fff",
-      borderRadius: "5px",
+      borderRadius: "4px",
       boxShadow: "0px 2px 5px rgba(0,0,0,0.2)"
     }}>
       {label}
@@ -37,35 +37,31 @@ const SidebarBeaker = ({ color, label, onClick }) => (
 
 
 
-const TableBeaker = ({ color, label, position, onUpdatePosition, onNearBurette }) => {
+const TableBeaker = ({ color, label, position, onUpdatePosition, onNearBurette, onPourUpdate }) => {
   const [tilted, setTilted] = useState(false);
   const [pouring, setPouring] = useState(false);
-  const [pourAmount, setPourAmount] = useState(0);
+  const [pourHeight, setPourHeight] = useState(0.1);
   const [autoPositioned, setAutoPositioned] = useState(false);
 
-  // 🔄 Smooth tilting animation
   const [{ rotation }, apiRotation] = useSpring(() => ({
     rotation: [-Math.PI / 8, 0, Math.PI / 200],
     config: { mass: 1, tension: 180, friction: 20 },
   }));
 
-  // 🏗️ Smooth movement animation
   const [{ pos }, api] = useSpring(() => ({
     pos: position,
     config: { mass: 1, tension: 120, friction: 14 },
   }));
 
-  // 🎯 Auto-tilt when beaker is positioned correctly
   useEffect(() => {
     if (tilted) {
-      apiRotation.start({ rotation: [ 0, 0,-Math.PI / 5.7] }); // 🔄 Tilt 30° (π/6 radians)
+      apiRotation.start({ rotation: [0, 0, -Math.PI / 4] });
       startPouring();
     }
   }, [tilted]);
 
-  // 🎯 Dragging function
   const bind = useDrag(({ offset: [x, y] }) => {
-    if (autoPositioned) return; // Prevent dragging after auto-positioning
+    if (autoPositioned) return;
 
     const newX = x * 0.032;
     const newY = -y * 0.032;
@@ -74,48 +70,55 @@ const TableBeaker = ({ color, label, position, onUpdatePosition, onNearBurette }
     api.start({ pos: newPos });
     onUpdatePosition(newPos);
 
-    // ✅ Automatically position and tilt when near burette
     if (Math.abs(newX - 0.4) < 0.3 && Math.abs(newY - 1.5) < 0.4) {
       setAutoPositioned(true);
-      api.start({ pos: [-0.6, 2.4, 0] }); // 🔄 Snap to correct position
-  
+      api.start({ pos: [-0.6, 2.6, 0] });
+
       setTimeout(() => {
-        setTilted(true); // ✅ Trigger tilting
+        setTilted(true);
         setPouring(true);
         onNearBurette(color);
-      }, 500); // Smooth transition before tilting
+      }, 500);
     } else {
       resetBeaker();
     }
   });
 
-  // ✅ Function to smoothly tilt and pour
+  // ✅ Function to smoothly increase pouring height & update Burette
   const startPouring = () => {
     let pourTime = 0;
     const pourInterval = setInterval(() => {
-      setPourAmount((prev) => {
-        if (pourTime >= 6) {
+      setPourHeight((prev) => {
+        if (pourTime >= 5) {
           clearInterval(pourInterval);
-          setTimeout(resetBeaker, 1000); // Reset after pouring completes
+          setTimeout(resetBeaker, 1500);
           return prev;
         }
-        pourTime += 0.4;
-        return prev + 0.4;
+        pourTime += 0.3;
+        onPourUpdate(0.02); // Send small volume increments
+        return prev + 0.00001;
       });
     }, 100);
   };
 
-  // 🔄 Function to reset the beaker
+  const getPourPath = (height) => {
+    return new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.2, 0, 0),
+      new THREE.Vector3(0.3, -height / 14, 0.4),
+      new THREE.Vector3(0.6, -height, 0.1),
+    ]);
+  };
+
   const resetBeaker = () => {
     setTilted(false);
     setPouring(false);
-    setPourAmount(0);
+    setPourHeight(0.1);
     setAutoPositioned(false);
-    apiRotation.start({ rotation: [0, 0, 0] }); // Reset rotation
+    apiRotation.start({ rotation: [0, 0, 0] });
   };
 
   return (
-    <animated.group position={pos} {...bind()} rotation={rotation} scale={[0.5, 0.5, 0.5]} >
+    <animated.group position={pos} {...bind()} rotation={rotation} scale={[0.5, 0.5, 0.5]}>
       {/* Beaker Container */}
       <mesh position={[0, -0.5, 0]}>
         <cylinderGeometry args={[0.6, 0.6, 1.5, 32, 1, true]} />
@@ -134,17 +137,15 @@ const TableBeaker = ({ color, label, position, onUpdatePosition, onNearBurette }
       </Text>
 
       {/* Pouring Liquid Effect */}
-      {pouring && pourAmount > 0 && (
-        <mesh position={[0.5,-1 +1.9 ,2]} rotation={[-Math.PI / 1.9, 0, 0]}>
-          <cylinderGeometry args={[0.2, 0.2, pourAmount-2 , 36]} />
+      {pouring && pourHeight > 0 && (
+        <mesh position={[0.4, -1 + 1.7, 2]}>
+          <tubeGeometry args={[getPourPath(pourHeight), 27, 0.12, 17, false]} />
           <meshStandardMaterial color={color} transparent opacity={0.8} />
         </mesh>
       )}
     </animated.group>
   );
 };
-
-
 
 
 
@@ -170,32 +171,64 @@ const BuretteStand = () => {
 
 
 // 🎯 Burette
-const Burette = ({ liquidColor, liquidHeight }) => {
-  // Load the burette GLB model
+const Burette = ({ liquidColor = "black", pouredVolume }) => {
   const { scene } = useGLTF("/burettel.glb");
-  console.log("Burette Model:", scene); // Make sure the path is correct
+  const [liquidHeight, setLiquidHeight] = useState(0); // start from 0
+  const [color, setColor] = useState(liquidColor);
 
-  // Liquid animation
-  const { animatedHeight } = useSpring({
-    animatedHeight: liquidHeight,
-    config: { tension: 80, friction: 20 },
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        child.material.transparent = true;
+        child.material.opacity = 0.3;
+        child.material.depthWrite = true;
+      }
+    });
+  }, [scene]);
+
+  // update height on pour
+  useEffect(() => {
+    if (pouredVolume > 0) {
+      setLiquidHeight((prev) => Math.min(prev + pouredVolume, 1.2));
+    }
+  }, [pouredVolume]);
+
+  useEffect(() => {
+    if (liquidColor) setColor(liquidColor);
+  }, [liquidColor]);
+
+  // react-spring animation
+  const { height } = useSpring({
+    height: liquidHeight,
+    config: { tension: 120, friction: 18 },
   });
 
   return (
     <group>
-      {/* Render the burette model */}
-      <primitive object={scene} scale={[16, 19, 16]} position={[0, 0.2, -1.1]} />
+      {/* Static model */}
+      <primitive object={scene} scale={[28, 19, 16]} position={[0, 0.2, -1.1]} />
 
-      {/* Animated liquid inside the burette */}
-      {liquidColor && (
-        <animated.mesh position={[0, animatedHeight.to(h => -0.75 + h), 0]}>
-          <cylinderGeometry args={[0.045, 0.045, 1.6, 32]} />
-          <meshStandardMaterial color={liquidColor} opacity={0.8} transparent />
-        </animated.mesh>
+      {/* Liquid shown only after pouring */}
+      {liquidHeight > 0 && (
+        <group position={[0, 0.25, -1.1]}>
+          <animated.mesh
+            scale={height.to((h) => [1, h, 1])}
+            position={height.to((h) => [0, h / 2, 0])}
+          >
+            <cylinderGeometry args={[0.1, 0.1, 1, 32]} />
+            <animated.meshStandardMaterial
+              color={color}
+              transparent
+              opacity={height.to((h) => (h > 0.01 ? 0.8 : 0))}
+            />
+          </animated.mesh>
+        </group>
       )}
     </group>
   );
 };
+
+
 
 
 // 🎯 Draggable Conical Flask
@@ -203,16 +236,34 @@ const ConicalFlask = () => {
   const { scene } = useGLTF("/cf.glb"); // Load the GLB model
   const [fixed, setFixed] = useState(false);
 
+  // 🔹 Adjustable Initial & Fixed Positions and Angles
+  const INITIAL_POSITION = [-4.3, 2.08, 0.2]; // Change manually
+  const INITIAL_ROTATION = [0, -Math.PI / 2, 0.2]; // Change manually
+
+  const FIXED_POSITION = [0, -1.08, -0.2]; // Change manually
+  const FIXED_ROTATION = [0, 0, 0]; // Change manually
+
   // ⚡ Smooth movement animation
-  const [{ pos , rot}, api] = useSpring(() => ({
-    pos: [-3.9, 2.5, 0.2],
-    rot: [0, 0.9, 0],// Initial position
+  const [{ pos, rot }, api] = useSpring(() => ({
+    pos: INITIAL_POSITION,
+    rot: INITIAL_ROTATION,
     config: { mass: 1, tension: 150, friction: 20 },
   }));
 
-  const rotateRight = () => {
-    api.start({ rot: [0, 0.2618, 0] });
-  };
+  // Change material color
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        child.material = new THREE.MeshStandardMaterial({
+          color: "white", // Change color
+          transparent: true,
+          opacity: 0.4, // Adjust transparency
+          roughness: 0.2,
+          metalness: 0.1,
+        });
+      }
+    });
+  }, [scene]);
 
   // 🏗️ Dragging function
   const bind = useDrag(({ offset: [x, y] }) => {
@@ -221,9 +272,9 @@ const ConicalFlask = () => {
       const newY = -y * 0.016;
       api.start({ pos: [newX, newY, 0] });
 
-      // ✅ Auto-position under burette
+      // ✅ Auto-position & adjust angle when near the burette
       if (Math.abs(newX - 0.4) < 0.2) {
-        api.start({ pos: [0, -0.7, -0.2] });
+        api.start({ pos: FIXED_POSITION, rot: FIXED_ROTATION });
         setFixed(true);
       }
     }
@@ -232,15 +283,16 @@ const ConicalFlask = () => {
   return (
     <animated.group
       position={pos.to((x, y, z) => [x, y, z])}
-      rotation={rot}
-      // 🏗️ Bind animated position
-      {...bind()}
-      scale={[0.5, 0.5, 0.5]} // Adjust the scale if needed
+      rotation={rot.to((x, y, z) => [x, y, z])}
+      {...bind()} // 🏗️ Bind animated position
+      scale={[0.25, 0.25, 0.25]}
     >
-      <primitive object={scene} rotation={[Math.PI / 20, -Math.PI / 8, 0.2]}/>
+      <primitive object={scene} />
     </animated.group>
   );
 };
+
+
 
 // 🔹 Rack Component (Holds all items)
 const GlassRack = () => {
@@ -249,9 +301,9 @@ const GlassRack = () => {
   return (
     <primitive
       object={scene}
-      position={[-1.5, -2.9, 0]}  // Position of the Glass Rack
-      scale={[1.0, 1.4,1.2 ]}      // Scale the model if needed
-      rotation={[-0.3,1.7,0.1]}  // Optional: Adjust rotation if necessary
+      position={[-2.4, -2.9, 0]}  // Position of the Glass Rack
+      scale={[0.5, 1.4,1.2 ]}      // Scale the model if needed
+      rotation={[-0.3,1.8,-0.1]}  // Optional: Adjust rotation if necessary
     />
   );
 };
@@ -290,8 +342,8 @@ const ExperimentLayout = () => {
 
   // 🎯 Handle Beaker Near Burette (Trigger Liquid Flow & Tilt)
   const handleNearBurette = (color) => {
-    setBuretteLiquid(color);
-    setBuretteFill(0);  
+    setBuretteLiquid(color); // Set the color of the burette liquid
+    setBuretteFill(0);  // Reset fill
   
     let fillLevel = 0;
     const interval = setInterval(() => {
@@ -302,6 +354,14 @@ const ExperimentLayout = () => {
       }
     }, 100);  // **Smoother updates every 100ms**
   };
+
+  const [pouredVolume, setPouredVolume] = useState(0.5);
+
+  
+
+const handlePourUpdate = (volume) => {
+  setPouredVolume((prev) => prev + volume);
+};
   
   return (
     <div style={{ display: "flex", flexDirection: "row", height: "90vh" }}>
@@ -330,21 +390,22 @@ const ExperimentLayout = () => {
           {/* 🎯 Experiment Objects */}
           <group rotation={rotationEnabled ? [0, 0, 0] : [0, 0, 0]}>
             <BuretteStand />
-            <Burette liquidColor={buretteLiquid} liquidHeight={buretteFill} />
+            <Burette liquidColor={buretteLiquid} pouredVolume={pouredVolume} />
             <ConicalFlask />
 
             {/* Render Reagents (Beakers) on Table */}
             {beakersOnTable.map((beaker, index) => (
               <TableBeaker
-                key={index}
-                {...beaker}
-                position={[-3.9 + index * 1.0, -0.6, 0]}
-                onUpdatePosition={(newPos) => {
-                  let updatedBeakers = [...beakersOnTable];
-                  updatedBeakers[index].position = newPos;
-                  setBeakersOnTable(updatedBeakers);
-                }}
-                onNearBurette={handleNearBurette}
+              key={index}
+              {...beaker}
+              position={[-3.9 + index * 1.0, -0.6, 0]}
+              onUpdatePosition={(newPos) => {
+                let updatedBeakers = [...beakersOnTable];
+                updatedBeakers[index].position = newPos;
+                setBeakersOnTable(updatedBeakers);
+              }}
+              onNearBurette={handleNearBurette}
+              onPourUpdate={handlePourUpdate}
               />
             ))}
           </group>
